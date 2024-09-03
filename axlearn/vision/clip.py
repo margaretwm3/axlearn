@@ -27,6 +27,9 @@ from axlearn.common.attention import (
     build_remat_spec,
     scaled_hidden_dim,
 )
+# To use Window Attention in Transformer 
+from axlearn.vision.attention import StackedWindowedTransformerLayer
+
 from axlearn.common.base_layer import BaseLayer, ParameterSpec
 from axlearn.common.bert import bert_embedding_config, bert_model_config, bert_transformer_config
 from axlearn.common.config import (
@@ -217,13 +220,20 @@ def set_transformer_config(
     Returns:
         A instantiable BaseStackedTransformerLayer Config.
     """
+    print(f"Mingshan in clip.py, remat is {remat}")
     if remat:
-        transformer_cfg = RepeatedTransformerLayer.default_config()
+        transformer_cfg = StackedWindowedTransformerLayer.default_config()
+        # original
+        # transformer_cfg = RepeatedTransformerLayer.default_config()
     else:
-        transformer_cfg = StackedTransformerLayer.default_config()
+        # transformer_cfg = StackedTransformerLayer.default_config()
+        # Mingshan: try out window attention
+        transformer_cfg = StackedWindowedTransformerLayer.default_config()
+       
     # Set up the Transformer.
     transformer_cfg.num_layers = num_layers
     transformer_lyr_cfg = transformer_cfg.layer
+
     transformer_lyr_cfg.feed_forward.hidden_dim = feed_forward_dim
     transformer_lyr_cfg.feed_forward.activation = feed_forward_act
     transformer_lyr_cfg.self_attention.attention.num_heads = num_heads
